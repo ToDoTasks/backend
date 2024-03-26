@@ -18,8 +18,8 @@ module.exports = {
       endDate: {
         type: Sequelize.DATE
       },
-      state: {
-        type: Sequelize.BOOLEAN
+      priority: {
+        type: Sequelize.STRING
       },
       userId:{
         type: Sequelize.INTEGER,

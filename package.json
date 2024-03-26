@@ -4,7 +4,7 @@
   "description": "the backend of a task manager app",
   "main": "index.js",
   "scripts": {
-    "devStart": "nodemon index.js",
+    "devServer": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,6 +22,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.0.2",
     "pg": "^8.11.3",
