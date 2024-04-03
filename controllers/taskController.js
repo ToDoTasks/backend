@@ -1,3 +1,4 @@
+const { stringify } = require('uuid');
 const db = require('../models/index');
 
 // Enum type
@@ -10,14 +11,16 @@ const Level = Object.freeze({
 const createTask = async (req, res) => {
     try {
         console.info("inside the create method")
+        console.debug("UserId : " + req.user.id);
         const { title, description, endDate, priority } = req.body;
         const task = await db.Task.findOne({
-            where: {title: req.body.title, userId: req.user.id},
+            where: {title: title, userId: req.user.id},
         });
         if(task) return res.status(400).json({message:'Your already have a task with the same title'});
         const currentDate = new Date();
-        if ( endDate.getTime() < currentDate.getTime() ) return res.status(400).json({message:'Invalid date'});
-        const level = '';
+        if ( new Date(endDate).getTime() < currentDate.getTime() ) return res.status(400).json({message:'Invalid date'});
+        
+        let level = '';
         switch (priority) {
             case Level.HIGH:
                 level = Level.HIGH;
@@ -41,7 +44,7 @@ const createTask = async (req, res) => {
             userId: req.user.id
         });
 
-        return res.status(202).json({message:'Task created'});
+        return res.status(201).json({message:'Task created successfully'});
     } catch (error) {
         console.log(error);
         return res.status(500).json({message:'Internal server error'});
@@ -50,14 +53,15 @@ const createTask = async (req, res) => {
 
 const editTask = async(req, res) => {
     try {
-        const { title, description, endDate, priority } = req.body;
+        const { id, title, description, endDate, priority } = req.body;
         const task = await db.Task.findOne({ 
-            where: {id: req.body.id}
+            where: {id: id}
         });
         const currentDate = new Date();
-        if ( task.userId != req.user.id || task.endDate.getTime() < currentDate.getTime() ) return res.status(400).json({message:'Action Forbidden'});
-        if ( endDate.getTime() < currentDate.getTime() ) return res.status(400).json({message:'Invalid date'});
-        const level = '';
+        console.log('TaskUserId : ' +task.userId + ' userId :' + req.user.id)
+        if ( task.userId != req.user.id ) return res.status(400).json({message:'Action Forbidden'});
+        if ( new Date(endDate).getTime() < currentDate.getTime() ) return res.status(400).json({message:'Invalid date'});
+        let level = '';
         switch (priority) {
             case Level.HIGH:
                 level = Level.HIGH;
@@ -73,14 +77,14 @@ const editTask = async(req, res) => {
                 break;
         };
         
-        await db.Task.update({
+        await task.update({
             title : title,
             description: description,
             endDate: endDate,
             priority: level,
         });
 
-        return res.status(204).json({message:'Task updated'});
+        return res.status(200).json({message:'Task updated'});
     } catch (error) {
         console.log(error);
         return res.status(500).json({message:'Internal server error'});
@@ -92,12 +96,10 @@ const deleteTask = async(req, res) => {
         const task = await db.Task.findOne({ 
             where: {id: req.params.id}
         });
-        if ( task.userId != req.user.id ) return res.status(400).json({message:'Action Forbidden'});
-        await db.Task.delete({
-            where: {id: req.body.id}
-        });
+        if ( task.userId !== req.user.id ) return res.status(400).json({message:'Action Forbidden'});
+        await task.destroy();
 
-        return res.status(200).json({message:'Task deleted'});
+        return res.json({message:'Task deleted'});
     } catch (error) {
         console.log(error);
         return res.status(500).json({message:'Internal server error'});
@@ -107,7 +109,12 @@ const deleteTask = async(req, res) => {
 const getUserTasks = async (req, res) => {
     try {
         const tasks = await db.Task.findAll({
-            where:{userId: req.user.id}
+            where:{
+                userId: req.user.id
+            },
+            attributes: {
+                exclude: ['userId']
+            }
         });
         return res.status(200).json(tasks); 
     } catch (error) {

@@ -39,15 +39,16 @@ const signIn = async (req, res) => {
         if(!passwordValid) return res.status(404).json({message:'Incorrect username or password'});
 
         // Authenticate user with jwt
-        const token = jwt.sign({ id: user.id}, process.env.JWT_SECRET, {
+        const token = jwt.sign({ id: user.id, name: user.username}, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRATION
         });
         let refreshToken = await createToken(user);
         return res.status(200).json({
-            id : user.id,
             username : user.username,
             accessToken : token,
             refreshToken,
+            expire_at: process.env.JWT_EXPIRATION,
+            refresh_token_expire_at: process.env.JWT_REFRESH_EXPIRATION
         });
     } catch (error) {
         console.log(error);

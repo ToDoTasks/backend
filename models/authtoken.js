@@ -35,7 +35,6 @@ module.exports = (sequelize, DataTypes) => {
       expireAt: dt,
       userId: user.id,
     });
-    console.log
     return refreshToken.token;
   };
 

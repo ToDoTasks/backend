@@ -4,7 +4,7 @@ const { TokenExpiredError } = jwt;
 
 const catchError = (err, res) => {
     if (err instanceof TokenExpiredError ) return res.status(401).json({mseeage: "Unauthorized access expired"});
-    return res.status(401).json({message: "Unnnauthorized"});
+    return res.status(401).json({message: "Unauthorized"});
 }
 
 const verifyToken = (req, res, next) => {
