@@ -56,7 +56,7 @@ const editTask = async(req, res) => {
         const { id, title, description, endDate, priority } = req.body;
         const task = await db.Task.findOne({ 
             where: {id: id}
-        });
+        });       
         const currentDate = new Date();
         console.log('TaskUserId : ' +task.userId + ' userId :' + req.user.id)
         if ( task.userId != req.user.id ) return res.status(400).json({message:'Action Forbidden'});
@@ -93,9 +93,12 @@ const editTask = async(req, res) => {
 
 const deleteTask = async(req, res) => {
     try {
+        console.log(' Id type :' + typeof req.params.taskId);
         const task = await db.Task.findOne({ 
-            where: {id: req.params.id}
+            where: {id: req.params.taskId}
         });
+        console.log('task : ' +task);
+        if ( !task ) return res.status(400).json({message:'Object not found'});
         if ( task.userId !== req.user.id ) return res.status(400).json({message:'Action Forbidden'});
         await task.destroy();
 

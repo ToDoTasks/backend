@@ -58,14 +58,13 @@ const signIn = async (req, res) => {
 
 const refreshToken = async (req, res) => {
     const { requestToken } = req.body;
-    if( requestToken === null ) return res.status(403).json({message:"Refresh Token is required"});
     try{
         let refreshToken = await db.AuthToken.findOne({
             where: {
                 token: requestToken
             }
         });
-        if( refreshToken == null ) return res.status(403).json({message:'Invalid refresh token'});
+        if(!refreshToken) return res.status(403).json({message:'Invalid refresh token'});
         if(verifyExpiration(refreshToken)){
             db.AuthToken.destroy({
                 where: {
@@ -82,17 +81,13 @@ const refreshToken = async (req, res) => {
                 exclude: ['password']
             }
         });
-        let newAccessToken = jwt.sign(
-            {id: user.id}, 
-            process.env.JWT_SECRET, 
+        let newAccessToken = jwt.sign({id: user.id}, process.env.JWT_SECRET, 
             {expiresIn: process.env.JWT_REFRESH_EXPIRATION,}
         );
 
         return res.status(200).json({
-            id : user.id,
-            username : user.username,
             accessToken: newAccessToken,
-            refreshToken: refreshToken.token,
+            expire_at: process.env.JWT_EXPIRATION,
         })
     } catch (error){
         console.log(error);
