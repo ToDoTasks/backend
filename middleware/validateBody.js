@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 const authValidator = [
     body('username')
         .notEmpty()
-        .custom(value => !/\s/.test(value)) // test if space is not present
+        .custom(value => /^\w|\d$/.test(value)) // test if space is not present
         .withMessage('username is required')
         .isString()
         .withMessage('username must be a string')
@@ -28,8 +28,8 @@ const refrehTokenValidator = [
         .withMessage('Invalid data format')
 ];
 
-// createTask validator
-const createTaskValidator = [
+// createTask an edit validator
+const taskValidator = [
     body('title')
         .notEmpty() 
         .custom(value => /^\w|\d$/.test(value))
@@ -58,17 +58,6 @@ const createTaskValidator = [
         .withMessage('priority field must be a string'),              
 ];
 
-// editTask validator
-const editTaskValidator = [
-    body('id')
-        .exists()
-        .custom(value => !/\s/.test(value))
-        .withMessage('required field')
-        .isNumeric()
-        .withMessage('Incorrect value'),
-    createTaskValidator,
-]
-
 
 // Use of validators
 const validator = (req, res, next) => {
@@ -80,7 +69,6 @@ const validator = (req, res, next) => {
 module.exports = {
     authValidator,
     refrehTokenValidator,
-    createTaskValidator,
-    editTaskValidator,
+    taskValidator,
     validator
 };

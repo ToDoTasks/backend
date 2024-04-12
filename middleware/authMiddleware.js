@@ -8,10 +8,16 @@ const catchError = (err, res) => {
 }
 
 const verifyToken = (req, res, next) => {
-    const token = req.headers['x-access-token'];
-    //const token = authHeader && authHeader.split(' ')[1];
+    //const token = req.headers['x-access-token'];
+    let token = req.headers['authorization'];
 
     if(!token) return res.status(403). json({message: "Access denied"});
+
+    if (token && token.startsWith('Bearer ')) {
+        token = token.slice(7, token.length);
+    } else {
+        return res.status(403). json({message: "Access denied"});
+    }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return catchError(err, res) ;
